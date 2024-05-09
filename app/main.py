@@ -9,12 +9,13 @@ from pydantic import BaseModel
 
 from app.api import router as api_router
 from app.core.config import settings
-from app.db.init_db import get_db
+
+# from app.db.init_db import init_db
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    get_db()
+    # init_db()
     yield
 
 
