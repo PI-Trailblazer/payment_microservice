@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "app"
+version = "0.1.0"
+description = ""
+authors = ["andreaoliveira9 <andreaoliveira@ua.pt>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.111.0"
+pydantic = "^2.7.1"
+pika = "^1.3.2"
+pyjwt = "^2.8.0"
+loguru = "^0.7.2"
+
+
+[tool.poetry.group.dev.dependencies]
+uvicorn = "^0.29.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
