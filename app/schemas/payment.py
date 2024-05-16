@@ -1,11 +1,12 @@
 from pydantic import BaseModel
+from typing import Optional
+from datetime import datetime as Datetime
 
 
 class Transaction(BaseModel):
     userid: str
     amount: float
     quantity: int
-    timesatmp: str
     status: str
     offer_id: int
     nationality: str
@@ -19,7 +20,6 @@ class TransactionUpdate(Transaction):
     userid: str
     amount: float
     quantity: int
-    timesatmp: str
     status: str
     offer_id: int
     nationality: str
@@ -27,3 +27,4 @@ class TransactionUpdate(Transaction):
 
 class TransactionInDB(Transaction):
     id: int
+    timestamp: Optional[Datetime]

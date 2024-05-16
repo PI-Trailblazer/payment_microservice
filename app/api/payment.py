@@ -6,7 +6,7 @@ from requests import Session
 from fastapi.params import Query
 from typing import List, Optional
 from app import crud
-from app.api import deps
+from app.api import auth_deps, deps
 from app.schemas import (
     Transaction,
     TransactionCreate,
@@ -23,12 +23,14 @@ def create_transaction(
     *,
     db: Session = Depends(deps.get_db),
     transaction: TransactionCreate,
-    headers: deps.AuthHeader = Depends(deps.get_auth_header),
+    payload=Security(auth_deps.verify_token, scopes=[]),
 ) -> Transaction:
-    id_token = headers.Authorization[7:]
-    uid = deps.decode_token(id_token)["user_id"]
+    uid = payload.sub
+
     transaction.userid = uid
-    return crud.transaction.create(db, obj_in=transaction)
+    transaction = crud.transaction.create(db, obj_in=transaction)
+
+    return transaction
 
 
 # Needs authorization
@@ -53,8 +55,13 @@ def get_transaction_by_id(
 def get_transactions_by_userid(
     *,
     db: Session = Depends(deps.get_db),
-    headers: deps.AuthHeader = Depends(deps.get_auth_header),
+    payload=Security(auth_deps.verify_token, scopes=[]),
 ) -> List[TransactionInDB]:
-    id_token = headers.Authorization[7:]
-    uid = deps.decode_token(id_token)["user_id"]
+    uid = payload.sub
     return crud.transaction.get_transactions_by_userid(db, uid)
+
+
+@router.delete("/")
+def delete_all_transactions(db: Session = Depends(deps.get_db)):
+    crud.transaction.delete_all_transactions(db)
+    return Response(status_code=204)
