@@ -6,7 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base_class import Base
 
-from datetime import datetime
+from datetime import datetime as Datetime
 from sqlalchemy import DateTime
 
 
@@ -15,8 +15,8 @@ class Transaction(Base):
     userid: Mapped[str] = mapped_column(String(128), nullable=False)
     amount: Mapped[float] = mapped_column(Float, nullable=False)
     quantity: Mapped[int] = mapped_column(Integer, nullable=False)
-    timestamp: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.now(), nullable=False
+    timestamp: Mapped[DateTime] = mapped_column(
+        DateTime, default=Datetime.now().isoformat(), nullable=False
     )
     status: Mapped[str] = mapped_column(String(128), nullable=False)
     offer_id: Mapped[int] = mapped_column(Integer, nullable=False)
