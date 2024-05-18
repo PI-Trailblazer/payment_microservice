@@ -2,11 +2,49 @@ from sqlalchemy.orm import Session
 from app.crud.base import CRUDBase
 from app.models.payment import Transaction
 from app.schemas.payment import TransactionCreate, TransactionUpdate
+import pika
+from fastapi.encoders import jsonable_encoder
+from datetime import datetime as Datetime
+import json
 
 
 class CRUDPayment(CRUDBase[Transaction, TransactionCreate, TransactionUpdate]):
     def create(self, db: Session, *, obj_in: TransactionCreate) -> Transaction:
-        return super().create(db, obj_in=obj_in)
+
+        db_obj = super().create(db, obj_in=obj_in)
+        connection = pika.BlockingConnection(
+            pika.ConnectionParameters(
+                host="rabbitmq",
+                port=5672,
+                virtual_host="/",
+                credentials=pika.PlainCredentials(username="user", password="user"),
+            )
+        )
+        channel = connection.channel()
+        channel.queue_declare(queue="payment")
+
+        payment_dict = jsonable_encoder(obj_in)
+        payment_dict["timestamp"] = Datetime.now().isoformat()
+        body = json.dumps(payment_dict)
+
+        channel.basic_publish(
+            exchange="",
+            routing_key="payment",
+            body=body,
+        )
+
+        connection.close()
+
+        return db_obj
+
+    connection = pika.BlockingConnection(
+        pika.ConnectionParameters(
+            host="rabbitmq",
+            port=5672,
+            virtual_host="/",
+            credentials=pika.PlainCredentials(username="user", password="user"),
+        )
+    )
 
     def update(
         self, db: Session, *, db_obj: Transaction, obj_in: TransactionUpdate
