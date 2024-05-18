@@ -16,23 +16,46 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data
 
+
   payment_microservice:
     build:
       context: .
-      dockerfile: Dockerfile
+    ports:
+      - 8004:8004
     environment:
       POSTGRES_USER: payment_db_user
       POSTGRES_PASSWORD: payment_db_password
       POSTGRES_DB: payment_db_test
       POSTGRES_SERVER: db_pg
-    ports:
-      - 8004:8004
     volumes:
       - .:/payment_microservice
     depends_on:
       db_pg:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: heidiks/rabbitmq-delayed-message-exchange:latest
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: user
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "node_health_check"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    restart: unless-stopped
 
 volumes:
   pg_data:
+    driver: local
+  rabbitmq-data:
     driver: local

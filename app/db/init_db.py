@@ -5,7 +5,7 @@ from .session import engine
 from app.utils import ROOT_DIR
 from app.core.config import settings
 
-last_known_revision = "..."
+last_known_revision = "44ca4c6b22f2"
 
 
 def init_db() -> None:
