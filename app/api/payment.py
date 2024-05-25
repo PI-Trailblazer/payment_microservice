@@ -13,8 +13,21 @@ from app.schemas import (
     TransactionUpdate,
     TransactionInDB,
 )
+import pika
 
 router = APIRouter()
+
+connection = pika.BlockingConnection(
+    pika.ConnectionParameters(
+        host="rabbitmq",
+        port=5672,
+        virtual_host="/",
+        credentials=pika.PlainCredentials(username="user", password="user"),
+    )
+)
+
+channel = connection.channel()
+channel.queue_declare(queue="purchased_offers")
 
 
 # Needs authorization
@@ -29,6 +42,12 @@ def create_transaction(
 
     transaction.userid = uid
     transaction = crud.transaction.create(db, obj_in=transaction)
+
+    channel.basic_publish(
+        exchange="",
+        routing_key="purchased_offers",
+        body={"offer_id": transaction.offer_id},
+    )
 
     return transaction
 
