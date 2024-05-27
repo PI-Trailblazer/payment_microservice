@@ -1,3 +1,4 @@
+import json
 from fastapi import APIRouter, Depends, HTTPException, Security, Cookie, Response
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
@@ -43,10 +44,11 @@ def create_transaction(
     transaction.userid = uid
     transaction = crud.transaction.create(db, obj_in=transaction)
 
+    body = json.dumps({"offer_id": transaction.offer_id})
     channel.basic_publish(
         exchange="",
         routing_key="purchased_offers",
-        body={"offer_id": transaction.offer_id},
+        body=body,
     )
 
     return transaction
