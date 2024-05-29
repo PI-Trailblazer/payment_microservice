@@ -86,3 +86,10 @@ def get_transactions_by_userid(
 def delete_all_transactions(db: Session = Depends(deps.get_db)):
     crud.transaction.delete_all_transactions(db)
     return Response(status_code=204)
+
+
+@router.get("/offer/{offer_id}")
+def get_transactions_by_offer_id(
+    *, db: Session = Depends(deps.get_db), offer_id: int
+) -> List[TransactionInDB]:
+    return crud.transaction.get_transactions_by_offer_id(db, offer_id)
