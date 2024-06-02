@@ -27,9 +27,6 @@ connection = pika.BlockingConnection(
     )
 )
 
-channel = connection.channel()
-channel.queue_declare(queue="purchased_offers")
-
 
 # Needs authorization
 @router.post("/", response_model=Transaction)
@@ -43,6 +40,9 @@ def create_transaction(
 
     transaction.userid = uid
     transaction = crud.transaction.create(db, obj_in=transaction)
+
+    channel = connection.channel()
+    channel.queue_declare(queue="purchased_offers")
 
     body = json.dumps({"offer_id": transaction.offer_id})
     channel.basic_publish(
